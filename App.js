@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -11,8 +11,8 @@ export default function App() {
   return (
     <NavigationContainer> 
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={homeScreen} />   
-        <Stack.Screen name="details" component={detailsScreen} /> 
+        <Stack.Screen name="Welcome to Weatherly" component={HomeScreen} />   
+        <Stack.Screen name="Details" component={DetailsScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -21,22 +21,27 @@ export default function App() {
 const Stack = createNativeStackNavigator();
 
 // Home
-function homeScreen() {
+function HomeScreen({navigation}) {
   return (
     <View style={styles.container}>
-          <Text>Home </Text>
-        </View>
+          <Text>Home</Text>
+          <Button
+          title="Details"
+          onPress={()=> navigation.navigate('Details')}
+          />
+    </View>
   );
 }
 
 // details
-function detailsScreen() {
+function DetailsScreen() {
   return (
     <View style={styles.container}>
           <Text>details</Text>
-        </View>
+    </View>
   );
 }
+
 
 
 
