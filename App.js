@@ -5,6 +5,9 @@ import {ScrollView, Animated, Button, StyleSheet, Text, View } from 'react-nativ
 import { NavigationContainer, useNavigationBuilder, TabRouter} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import WeatherScreen from './ShowWeather';
+
+
 
 
 
@@ -65,11 +68,16 @@ function InProgressScreen({navigation}) {
   );
 }
 
+function TheWeather({navigation}) {
+  <WeatherScreen />;
+}
+
 // details
 function HomeScreen() {
   return (
     <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
       <TabBottom.Screen name="Details" component={DetailsScreen}/>
+      <TabBottom.Screen name="Current Weather" component={TheWeather}/>
       <TabBottom.Screen name="In Progress" component={InProgressScreen} />
       <TabBottom.Screen name="Credits" component={CreditScreen} />
     </TabBottom.Navigator>
