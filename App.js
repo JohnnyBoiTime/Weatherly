@@ -7,10 +7,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import WeatherScreen from './ShowWeather';
 
-
-
-
-
 // Main app
 export default function App() {
   return (
@@ -19,12 +15,11 @@ export default function App() {
           <Stack.Screen name="Welcome to Weatherly" component={WelcomeScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>
-      </NavigationContainer>
+      </NavigationContainer> 
   );
 }
 
 const Stack = createStackNavigator();
-
 
 const TabBottom = createBottomTabNavigator();
 
@@ -41,7 +36,7 @@ function WelcomeScreen({navigation}) {
 }
 
 // Home
-function DetailsScreen({navigation}) {
+function DetailsScreen() {
   return (
     <View style={styles.container}>
           <Text>Details</Text>
@@ -50,7 +45,7 @@ function DetailsScreen({navigation}) {
 }
 
 // Credits
-function CreditScreen({navigation}) {
+function CreditScreen() {
   return (
     <View style={styles.container}>
           <Text>Made by Philip Rickey</Text>
@@ -60,7 +55,7 @@ function CreditScreen({navigation}) {
 }
 
 // In progress
-function InProgressScreen({navigation}) {
+function InProgressScreen() {
   return (
     <View style={styles.container}>
           <Text>In Progress</Text>
@@ -68,24 +63,17 @@ function InProgressScreen({navigation}) {
   );
 }
 
-function TheWeather({navigation}) {
-  <WeatherScreen />;
-}
-
 // details
-function HomeScreen() {
+function HomeScreen(){
   return (
     <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
       <TabBottom.Screen name="Details" component={DetailsScreen}/>
-      <TabBottom.Screen name="Current Weather" component={TheWeather}/>
+      <TabBottom.Screen name="Current Weather" component={WeatherScreen}/>
       <TabBottom.Screen name="In Progress" component={InProgressScreen} />
       <TabBottom.Screen name="Credits" component={CreditScreen} />
     </TabBottom.Navigator>
   );
 }
-
-
-
 
 // Style for text
 const styles = StyleSheet.create({
