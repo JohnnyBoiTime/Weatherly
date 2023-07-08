@@ -1,38 +1,48 @@
 import react, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Button, View, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+
 
 // Main function to make the weather screen
 const WeatherScreen = () => {
+    const [city, setCity] = useState('');
     const [weatherData, setWeatherData] = useState(null);
-  
-    useEffect(() => {
-      // API Key
+    const [loading, setLoading] = useState(false);
+
       const apiKey = '36f14a7fb96cee69a613ad66ad705822';
+  
+    const getWeatherData = () =>{
       
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=47.6&lon=-122.33&appid=${apiKey}&units=imperial`;
+      setLoading(true);
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`;
   
       axios.get(apiUrl)
         .then(response => {
           setWeatherData(response.data);
+          setLoading(false);
         })
         .catch(error => {
           console.log('Error fetching weather data', error);
+          setLoading(false);
         });
-    }, []);
-  
-    if (!weatherData) {
-      return <Text>Loading</Text>
-    }
-
-    if (!weatherData.name) {
-      return <Text>Error! Cannot retrieve name</Text>
-    }
+    };
 
     return (
       <View style={styles.container}>
-        <Text>City: {weatherData.name}</Text>
+        <TextInput
+          style={styles.TextInput}
+          placeholder='Enter City'
+          value={city}
+          onChangeText={text=>setCity(text)}
+          />
+        <Button title="Get Weather" onPress={getWeatherData} />  
+        {loading && <Text>Loading....</Text>}
+        {weatherData && (
+          <View>
+            <Text>City: {weatherData.name}</Text>
         <Text>Temperature: {weatherData.main.temp}</Text>
+          </View>
+        )}
       </View>
     );
   };
@@ -43,10 +53,14 @@ const WeatherScreen = () => {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    city: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 20,
+    inputBox: {
+      width: '80%',
+      height: 40,
+      borderWidth: 1,
+      borderColor: 'gray',
+      borderRadius: 5,
+      marginBottom: 10,
+      paddingHorizontal: 10,
     },
   });
 
