@@ -9,29 +9,28 @@ const WeatherScreen = () => {
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(false);
 
-      const apiKey = '36f14a7fb96cee69a613ad66ad705822';
+    const apiKey = '36f14a7fb96cee69a613ad66ad705822';
   
     const getWeatherData = () =>{
-      
-      setLoading(true);
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`;
+    setLoading(true);
+    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=imperial`;
   
-      axios.get(apiUrl)
-        .then(response => {
-          setWeatherData(response.data);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log('Error fetching weather data', error);
-          setLoading(false);
-        });
+    axios.get(apiUrl)
+      .then(response => {
+        setWeatherData(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.log('Error fetching weather data', error);
+        setLoading(false);
+      });
     };
 
     return (
       <View style={styles.container}>
         <TextInput
-          style={styles.TextInput}
-          placeholder='Enter City'
+          style={styles.inputBox}
+          placeholder='Enter City Name'
           value={city}
           onChangeText={text=>setCity(text)}
           />
@@ -39,8 +38,15 @@ const WeatherScreen = () => {
         {loading && <Text>Loading....</Text>}
         {weatherData && (
           <View>
-            <Text>City: {weatherData.name}</Text>
-        <Text>Temperature: {weatherData.main.temp}</Text>
+            <Text>City: {weatherData.city.name}</Text>
+            <Text>Forecast for the next 7 days: </Text>
+            <View>
+              {weatherData.list.slice(0,7).map((item, index) => (
+              <Text key={index}>
+                {item.dt_txt}: {item.main.temp}, {item.weather[0].description}
+              </Text>
+              ))} 
+            </View>
           </View>
         )}
       </View>
@@ -54,13 +60,12 @@ const WeatherScreen = () => {
       justifyContent: 'center',
     },
     inputBox: {
-      width: '80%',
-      height: 40,
+      width: "50%",
+      borderColor: 'black',
+      margin: 12,
       borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 5,
-      marginBottom: 10,
-      paddingHorizontal: 10,
+      borderRadius: 10,
+      padding: 10,
     },
   });
 
