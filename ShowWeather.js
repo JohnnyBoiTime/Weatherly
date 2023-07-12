@@ -1,6 +1,7 @@
 import react, { useEffect, useState } from 'react';
 import { Button, View, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 // Main function to make the weather screen
@@ -41,11 +42,15 @@ const WeatherScreen = () => {
             <Text>City: {weatherData.city.name}</Text>
             <Text>Forecast for the next 7 days: </Text>
             <View>
-              {weatherData.list.slice(0,7).map((item, index) => (
-              <Text key={index}>
-                {item.dt_txt}: {item.main.temp}, {item.weather[0].description}
-              </Text>
-              ))} 
+              {weatherData.list.slice(0,7).map((item, index) => {
+                const forecastDate = new Date(item.dt_txt.split(' ')[0]);
+                const dayOfWeek = forecastDate.toLocaleDateString('en-US', {weekday: 'long'});
+                return (
+                  <Text key={index}>
+                    {dayOfWeek.split(',')[0]}: {item.main.temp}, {item.weather[0].description}
+                  </Text>
+                );
+              })} 
             </View>
           </View>
         )}
