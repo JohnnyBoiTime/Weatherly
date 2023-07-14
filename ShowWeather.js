@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ImageBackground, Button, View, SafeAreaView, ScrollView, TextInput, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { ImageBackground,  Button, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
 
 
@@ -8,6 +8,7 @@ const WeatherScreen = () => {
     const [city, setCity] = useState('');
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(false);
+
 
     const apiKey = '36f14a7fb96cee69a613ad66ad705822';
   
@@ -45,7 +46,7 @@ const WeatherScreen = () => {
           <View>
             <Text>City: {weatherData.city.name}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
-            <View>
+            <ScrollView style={styles.scroller} bounces='false'>
               {weatherData.list.slice(0,45).map((item, index) => {
                 const forecastDate = new Date(item.dt_txt.split(' ')[0]);
                 const dayOfWeek = forecastDate.toLocaleDateString('en-US', {weekday: 'long'});
@@ -59,19 +60,19 @@ const WeatherScreen = () => {
                 else if (item.dt_txt.split(' ')[1] == '00:00:00') {
                   return (
                     <Text key={index}>
-                      {dayOfWeek.split(',')[0]}: {"\n"} {item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
+                      {dayOfWeek.split(',')[0]}: {"\n"}{item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
                     </Text>
                   )
                 }
                 else {
                   return (
-                      <Text key={index}>
-                        {item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
-                      </Text>
+                    <Text key={index}>
+                      {item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
+                    </Text>
                   )
                 }
-            })} 
-            </View>
+            })}
+            </ScrollView>
           </View>
         )}
         </ImageBackground>  
@@ -96,8 +97,9 @@ const WeatherScreen = () => {
       padding: 10,
       color: 'black',
     },
-    scrollView: {
-      marginHorizontal: 20,
+    scroller: {
+      marginTop: 10,
+      marginVertical: 200,
     },
     img: {
       flex: 1,
