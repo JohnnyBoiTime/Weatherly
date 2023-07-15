@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ImageBackground,  Button, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
+import { ImageBackground, FlatList, Button, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 // Main function to make the weather screen
@@ -8,11 +9,42 @@ const WeatherScreen = () => {
     const [city, setCity] = useState('');
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [citySearch, setCitySearch] = useState([]);
 
 
     const apiKey = '36f14a7fb96cee69a613ad66ad705822';
   
-    const getWeatherData = () =>{
+    const search = (query) => {
+      setCity(query);
+        if (query) {
+          const apiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=20&appid=${apiKey}`;
+        
+        axios.get(apiUrl)
+        .then(response => {
+          const cities = response.data.map(cityItem => ({ 
+            name: cityItem.name,
+            state: cityItem.state,
+            country: cityItem.country,
+          }));
+          setCitySearch(cities);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.log('Could not get city data', error);
+          setLoading(false);
+        });
+      }
+      else {
+        setCitySearch([]);
+      }
+    };
+
+    const selectCity = (selectedCity) => {
+      setCity(selectedCity.name);
+      setCitySearch([]);
+    }
+
+    const getWeatherData = () => {
     setLoading(true);
     const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=imperial`;
   
@@ -38,7 +70,17 @@ const WeatherScreen = () => {
           placeholder='Enter City Name'
           placeholderTextColor='blue'
           value={city}
-          onChangeText={text=>setCity(text)}
+          onChangeText={search}
+          />
+        <FlatList 
+          data={citySearch}
+          renderItem={({item}) => (
+            <TouchableOpacity onPress={() => selectCity(item)}>
+              <Text styles={styles.dropdownItem}>{item.name}, {item.state}, {item.country}</Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.name}
+          style={styles.dropdown}
           />
         <Button title="Get Weather" onPress={getWeatherData} />  
         {loading && <Text>Loading....</Text>}
@@ -105,6 +147,16 @@ const WeatherScreen = () => {
       flex: 1,
       width: '100%',
       height: '100%',
+    },
+    dropdown: {
+      maxHeight: 200,
+      borderColor: 'gray',
+      borderWidth: 1,
+      borderRadius: 4,
+      paddingHorizontal: 8,
+    },
+    dropdownItem: {
+      paddingVertical: 8,
     },
   });
 
