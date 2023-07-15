@@ -7,6 +7,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 // Main function to make the weather screen
 const WeatherScreen = () => {
     const [city, setCity] = useState('');
+    const [cityState, setCityState] = useState(' ');
+    const [cityCountry, setCityCountry] = useState(' ');
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [citySearch, setCitySearch] = useState([]);
@@ -42,13 +44,14 @@ const WeatherScreen = () => {
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
       setCitySearch([]);
+      const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity.name},${selectedCity.state},${selectedCity.country}&appid=${apiKey}&units=imperial`;
+      getWeatherData(apiUrl);
     }
 
-    const getWeatherData = () => {
+    const getWeatherData = (theApiUrl) => {
     setLoading(true);
-    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=imperial`;
   
-    axios.get(apiUrl)
+    axios.get(theApiUrl)
       .then(response => {
         setWeatherData(response.data);
         setLoading(false);
@@ -86,7 +89,7 @@ const WeatherScreen = () => {
         {loading && <Text>Loading....</Text>}
         {weatherData && (
           <View>
-            <Text>City: {weatherData.city.name}</Text>
+            <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
               {weatherData.list.slice(0,45).map((item, index) => {
