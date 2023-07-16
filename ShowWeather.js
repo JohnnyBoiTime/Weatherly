@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageBackground, FlatList, Button, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
+import { ImageBackground, FlatList, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -11,6 +11,7 @@ const WeatherScreen = () => {
     const [loading, setLoading] = useState(false);
     const [showList, setShowList] = useState(false);
     const [citySearch, setCitySearch] = useState([]);
+    const [currentWeather, setCurrentWeather] = useState('');
 
 
     const apiKey = '36f14a7fb96cee69a613ad66ad705822';
@@ -52,7 +53,14 @@ const WeatherScreen = () => {
       setShowList(false);
       const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity.name},${selectedCity.state},${selectedCity.country}&appid=${apiKey}&units=imperial`;
       getWeatherData(apiUrl);
-    }
+    };
+
+    const weatherBackgrounds = {
+      'overcast clouds': require('./assets/overcast.jpg'),
+      'broken clouds': require('./assets/brokenClouds.jpg'),
+      'clear sky': require('./assets/clearSkies.jpg'),
+      'light rain': require('./assets/lightRain.jpg'),
+    };
 
     const getWeatherData = (theApiUrl) => {
     setLoading(true);
@@ -60,6 +68,7 @@ const WeatherScreen = () => {
     axios.get(theApiUrl)
       .then(response => {
         setWeatherData(response.data);
+        setCurrentWeather(response.data.weather[0].description);
         setLoading(false);
       })
       .catch(error => {
@@ -98,9 +107,10 @@ const WeatherScreen = () => {
         {loading && <Text>Getting Results...</Text>}
         {weatherData && (
           <View>
-            <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
+            <Text>City: {weatherData.list[0].weather[0].description} {weatherData.city.name}, {weatherData.city.country}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
+            <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
               {weatherData.list.slice(0,45).map((item, index) => {
                 const forecastDate = new Date(item.dt_txt.split(' ')[0]);
                 const dayOfWeek = forecastDate.toLocaleDateString('en-US', {weekday: 'long'});
@@ -126,6 +136,7 @@ const WeatherScreen = () => {
                   )
                 }
             })}
+            </ImageBackground>
             </ScrollView>
           </View>
         )}
@@ -154,6 +165,7 @@ const WeatherScreen = () => {
     scroller: {
       marginTop: 10,
       marginVertical: 200,
+      ImageBackground: '',
     },
     img: {
       flex: 1,
