@@ -7,10 +7,9 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 // Main function to make the weather screen
 const WeatherScreen = () => {
     const [city, setCity] = useState('');
-    const [cityState, setCityState] = useState(' ');
-    const [cityCountry, setCityCountry] = useState(' ');
     const [weatherData, setWeatherData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showList, setShowList] = useState(false);
     const [citySearch, setCitySearch] = useState([]);
 
 
@@ -18,6 +17,9 @@ const WeatherScreen = () => {
   
     const search = (query) => {
       setCity(query);
+      selectCity([]);
+      setCitySearch([]);
+
         if (query) {
           const apiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=20&appid=${apiKey}`;
         
@@ -30,20 +32,24 @@ const WeatherScreen = () => {
           }));
           setCitySearch(cities);
           setLoading(false);
+          setShowList(true);
         })
         .catch(error => {
           console.log('Could not get city data', error);
           setLoading(false);
+          setShowList(false);
         });
       }
       else {
         setCitySearch([]);
+        setShowList(false);
       }
     };
 
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
       setCitySearch([]);
+      setShowList(false);
       const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity.name},${selectedCity.state},${selectedCity.country}&appid=${apiKey}&units=imperial`;
       getWeatherData(apiUrl);
     }
@@ -75,18 +81,21 @@ const WeatherScreen = () => {
           value={city}
           onChangeText={search}
           />
-        <FlatList 
-          data={citySearch}
-          renderItem={({item}) => (
-            <TouchableOpacity onPress={() => selectCity(item)}>
-              <Text styles={styles.dropdownItem}>{item.name}, {item.state}, {item.country}</Text>
-            </TouchableOpacity>
+          <View>
+          {showList && (
+            <FlatList 
+              data={citySearch}
+              renderItem={({item}) => (
+                <TouchableOpacity onPress={() => selectCity(item)}>
+                  <Text styles={styles.dropdownItem}>{item.name}, {item.state}, {item.country}</Text>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.name}
+              style={styles.dropdown}
+            />
           )}
-          keyExtractor={(item) => item.name}
-          style={styles.dropdown}
-          />
-        <Button title="Get Weather" onPress={getWeatherData} />  
-        {loading && <Text>Loading....</Text>}
+        </View>
+        {loading && <Text>Getting Results...</Text>}
         {weatherData && (
           <View>
             <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
