@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { ImageBackground, FlatList, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { ImageBackground, Button, FlatList, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-
 
 // Main function to make the weather screen
 const WeatherScreen = () => {
@@ -11,8 +10,9 @@ const WeatherScreen = () => {
     const [loading, setLoading] = useState(false);
     const [showList, setShowList] = useState(false);
     const [citySearch, setCitySearch] = useState([]);
-    const [currentWeather, setCurrentWeather] = useState('');
-
+    const [savedCities, setSavedCities] = useState([]);
+    const [citySave, setCitySave] = useState([]);
+    const [showSavedCities, setShowSavedCities] = useState([]);
 
     const apiKey = '36f14a7fb96cee69a613ad66ad705822';
   
@@ -47,6 +47,21 @@ const WeatherScreen = () => {
       }
     };
 
+    const addCity = (city) => {
+    
+      if (!city || !city || savedCities.some(savedCity => savedCity.name === city.name)) {
+        return;
+      } 
+        setSavedCities([...savedCities, city]);
+    };
+
+    const saveCity = (citySelect) => {
+      if (citySave) {
+        addCity(citySave);
+        setCitySave(null);
+      }
+    };
+
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
       setCitySearch([]);
@@ -68,7 +83,6 @@ const WeatherScreen = () => {
     axios.get(theApiUrl)
       .then(response => {
         setWeatherData(response.data);
-        setCurrentWeather(response.data.weather[0].description);
         setLoading(false);
       })
       .catch(error => {
@@ -76,6 +90,21 @@ const WeatherScreen = () => {
         setLoading(false);
       });
     };
+
+    let savedCitiesList = null;
+
+  if (savedCities.length > 0) {
+    savedCitiesList = (
+      <View>
+        <Text>Saved Cities:</Text>
+        {savedCities.map(savedCity => (
+          <Text key={savedCity.id}>{savedCity.name}</Text>
+        ))}
+      </View>
+    );
+  } else {
+    savedCitiesList = <Text>No saved cities.</Text>;
+  }
 
     return (
       <View style={styles.container}>
@@ -90,6 +119,7 @@ const WeatherScreen = () => {
           value={city}
           onChangeText={search}
           />
+          {savedCitiesList}
           <View>
           {showList && (
             <FlatList 
@@ -106,11 +136,11 @@ const WeatherScreen = () => {
         </View>
         {loading && <Text>Getting Results...</Text>}
         {weatherData && (
-          <View>
-            <Text>City: {weatherData.list[0].weather[0].description} {weatherData.city.name}, {weatherData.city.country}</Text>
+          <View style={styles.container}>
+             <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
+            <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
-            <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
               {weatherData.list.slice(0,45).map((item, index) => {
                 const forecastDate = new Date(item.dt_txt.split(' ')[0]);
                 const dayOfWeek = forecastDate.toLocaleDateString('en-US', {weekday: 'long'});
@@ -136,15 +166,19 @@ const WeatherScreen = () => {
                   )
                 }
             })}
-            </ImageBackground>
             </ScrollView>
+            <Button title="Save" onPress={() => addCity({ name: weatherData.city.name, state: weatherData.city.state, country: weatherData.city.country })}></Button>
+            </ImageBackground>
           </View>
         )}
         </ImageBackground>  
       </View>
     );
   };
+
   
+export default WeatherScreen;
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -161,11 +195,6 @@ const WeatherScreen = () => {
       borderRadius: 10,
       padding: 10,
       color: 'black',
-    },
-    scroller: {
-      marginTop: 10,
-      marginVertical: 200,
-      ImageBackground: '',
     },
     img: {
       flex: 1,
@@ -184,4 +213,5 @@ const WeatherScreen = () => {
     },
   });
 
-  export default WeatherScreen;
+
+

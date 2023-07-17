@@ -17,7 +17,7 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer> 
   );
-}
+};
 
 const Stack = createStackNavigator();
 
@@ -33,7 +33,7 @@ function WelcomeScreen({navigation}) {
           />
     </View>
   );
-}
+};
 
 // Home
 function DetailsScreen() {
@@ -42,7 +42,7 @@ function DetailsScreen() {
           <Text>Details</Text>
     </View>
   );
-}
+};
 
 // Credits
 function CreditScreen() {
@@ -52,28 +52,29 @@ function CreditScreen() {
     </View>
   
   );
-}
+};
 
-// In progress
 function InProgressScreen() {
   return (
     <View style={styles.container}>
           <Text>In Progress</Text>
     </View>
+  
   );
-}
+};
+
 
 // details
 function HomeScreen(){
   return (
-    <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
-      <TabBottom.Screen name="Details" component={DetailsScreen}/>
-      <TabBottom.Screen name="Current Weather" component={WeatherScreen}/>
-      <TabBottom.Screen name="In Progress" component={InProgressScreen} />
-      <TabBottom.Screen name="Credits" component={CreditScreen} />
-    </TabBottom.Navigator>
+      <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
+        <TabBottom.Screen name="Details" component={DetailsScreen}/>
+        <TabBottom.Screen name="Current Weather" component={WeatherScreen}/>
+        <TabBottom.Screen name="In Progress" component={InProgressScreen} />
+        <TabBottom.Screen name="Credits" component={CreditScreen} />
+      </TabBottom.Navigator>
   );
-}
+};
 
 // Style for text
 const styles = StyleSheet.create({
