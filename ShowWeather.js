@@ -1,6 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageBackground, Button, FlatList, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 // Main function to make the weather screen
@@ -46,24 +47,36 @@ const WeatherScreen = () => {
       }
     };
 
-    const changeText = (text) => {
-      setCity(text);
-    };
-
-    const backspace = () => {
-      setCity(city.slice(0, -1));
-    };
 
     const addCity = (city) => {
       if (!city || !city || savedCities.some(savedCity => savedCity.name === city.name)) {
         return;
       } 
         setSavedCities([...savedCities, city]);
+        saveCitiesToStorage([...savedCities, city]);
     };
+
+    const saveCitiesToStorage = async (cities) => {
+      try {
+        const jsonVal = JSON.stringify(cities);
+        await AsyncStorage.setItem('savedCities', jsonVal);
+      } catch (error) {
+        console.log('Error! cannot save data to Async!, Error:', error);
+      }
+    };
+
+    const retrieveCities = async () => {
+      try {
+        const jsonVal = await AsyncStorage.getItem('savedCities');
+        const cities = jsonVal != null ? JSON.parse(jsonVal) : [];
+        setSavedCities(cities);
+      } catch (error) {
+        console.log('Could not retrieve data! Error:', error);
+      }
+    }
 
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
-      setCitySave(selectedCity);
       setCitySearch([]);
       setShowList(false);
       const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity.name},${selectedCity.state},${selectedCity.country}&appid=${apiKey}&units=imperial`;
@@ -90,6 +103,10 @@ const WeatherScreen = () => {
         setLoading(false);
       });
     };
+
+    useEffect(() => {
+      retrieveCities();
+    }, []);
 
     return (
       <View style={styles.container}>
@@ -188,7 +205,8 @@ export default WeatherScreen;
       width: "90%",
       height: 40,
       borderColor: 'black',
-      margin: 12,
+      margin: 10,
+      marginTop: 50,
       borderWidth: 1,
       borderRadius: 10,
       padding: 10,
