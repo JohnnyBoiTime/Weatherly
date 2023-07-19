@@ -12,7 +12,6 @@ const WeatherScreen = () => {
     const [citySearch, setCitySearch] = useState([]);
     const [savedCities, setSavedCities] = useState([]);
     const [citySave, setCitySave] = useState([]);
-    const [showSavedCities, setShowSavedCities] = useState([]);
 
     const apiKey = '36f14a7fb96cee69a613ad66ad705822';
   
@@ -47,23 +46,24 @@ const WeatherScreen = () => {
       }
     };
 
+    const changeText = (text) => {
+      setCity(text);
+    };
+
+    const backspace = () => {
+      setCity(city.slice(0, -1));
+    };
+
     const addCity = (city) => {
-    
       if (!city || !city || savedCities.some(savedCity => savedCity.name === city.name)) {
         return;
       } 
         setSavedCities([...savedCities, city]);
     };
 
-    const saveCity = (citySelect) => {
-      if (citySave) {
-        addCity(citySave);
-        setCitySave(null);
-      }
-    };
-
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
+      setCitySave(selectedCity);
       setCitySearch([]);
       setShowList(false);
       const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${selectedCity.name},${selectedCity.state},${selectedCity.country}&appid=${apiKey}&units=imperial`;
@@ -91,21 +91,6 @@ const WeatherScreen = () => {
       });
     };
 
-    let savedCitiesList = null;
-
-  if (savedCities.length > 0) {
-    savedCitiesList = (
-      <View>
-        <Text>Saved Cities:</Text>
-        {savedCities.map(savedCity => (
-          <Text key={savedCity.id}>{savedCity.name}</Text>
-        ))}
-      </View>
-    );
-  } else {
-    savedCitiesList = <Text>No saved cities.</Text>;
-  }
-
     return (
       <View style={styles.container}>
         <ImageBackground 
@@ -119,7 +104,18 @@ const WeatherScreen = () => {
           value={city}
           onChangeText={search}
           />
-          {savedCitiesList}
+          <View>
+            <Text>Saved Cities: </Text>
+            <FlatList
+            data={savedCities}
+            renderItem={({item}) => (
+              <TouchableOpacity onPress={() => selectCity(item)}>
+                <Text>{item.name}, {item.country}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item)=>item.name}
+            />
+          </View>
           <View>
           {showList && (
             <FlatList 
@@ -134,10 +130,11 @@ const WeatherScreen = () => {
             />
           )}
         </View>
-        {loading && <Text>Getting Results...</Text>}
+        {loading && city &&<Text>Getting Results...</Text>}
         {weatherData && (
           <View style={styles.container}>
-             <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
+            {city && (
+            <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
             <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
@@ -169,6 +166,7 @@ const WeatherScreen = () => {
             </ScrollView>
             <Button title="Save" onPress={() => addCity({ name: weatherData.city.name, state: weatherData.city.state, country: weatherData.city.country })}></Button>
             </ImageBackground>
+            )}
           </View>
         )}
         </ImageBackground>  
