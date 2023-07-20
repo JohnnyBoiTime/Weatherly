@@ -55,6 +55,11 @@ const WeatherScreen = () => {
         setSavedCities([...savedCities, city]);
         saveCitiesToStorage([...savedCities, city]);
     };
+    
+
+    const removeCity = (city) => {
+      setSavedCities(savedCities.filter(savedCity => savedCity.name !== city.name));
+    }
 
     const saveCitiesToStorage = async (cities) => {
       try {
@@ -73,7 +78,15 @@ const WeatherScreen = () => {
       } catch (error) {
         console.log('Could not retrieve data! Error:', error);
       }
-    }
+    };
+
+    const isCitySaved = (city) => {
+      return savedCities.some(savedCity => 
+        savedCity.name === city.name &&
+        savedCity.state === city.state &&
+        savedCity.country === city.country
+      );
+    };
 
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
@@ -147,10 +160,9 @@ const WeatherScreen = () => {
             />
           )}
         </View>
-        {loading && city &&<Text>Getting Results...</Text>}
-        {weatherData && (
+        {loading && city && <Text>Getting Results...</Text>}
+        {weatherData && city &&(
           <View style={styles.container}>
-            {city && (
             <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
             <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
@@ -181,9 +193,12 @@ const WeatherScreen = () => {
                 }
             })}
             </ScrollView>
+            {!isCitySaved({ name: weatherData.city.name, state: weatherData.city.state, country: weatherData.city.country}) ? (
             <Button title="Save" onPress={() => addCity({ name: weatherData.city.name, state: weatherData.city.state, country: weatherData.city.country })}></Button>
+            ) : (
+            <Button title="Remove" onPress={() => removeCity({ name: weatherData.city.name, state: weatherData.city.state, country: weatherData.city.country })}></Button>
+              )}
             </ImageBackground>
-            )}
           </View>
         )}
         </ImageBackground>  
