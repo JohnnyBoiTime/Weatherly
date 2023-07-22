@@ -1,11 +1,11 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import { StatusBar } from 'expo-status-bar';
 import {ImageBackground, Button, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer, useNavigationBuilder, TabRouter} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import WeatherScreen from './ShowWeather';
+import WeatherMap from './WeatherMaps';
 
 // Main app
 export default function App() {
@@ -14,7 +14,7 @@ export default function App() {
         <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
         <TabBottom.Screen name="Current Weather" component={WeatherScreen}/>
         <TabBottom.Screen name="Details" component={InProgressScreen2}/>
-        <TabBottom.Screen name="In Progress" component={InProgressScreen} />
+        <TabBottom.Screen name="Maps" component={WeatherMap} />
         <TabBottom.Screen name="Credits" component={CreditScreen} />
       </TabBottom.Navigator>
       </NavigationContainer> 

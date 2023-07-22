@@ -3,43 +3,41 @@ import { ImageBackground, Button, FlatList, View,  ScrollView, TextInput, Text, 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import moment from 'moment-timezone';
 
 // Main function to make the weather screen
 const WeatherScreen = () => {
-    const [city, setCity] = useState('');
-    const [weatherData, setWeatherData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [showList, setShowList] = useState(false);
-    const [citySearch, setCitySearch] = useState([]);
-    const [savedCities, setSavedCities] = useState([]);
-    const [citySave, setCitySave] = useState([]);
+    const [city, setCity] = useState(''); // States to set city
+    const [weatherData, setWeatherData] = useState(null); // States for weather data
+    const [showList, setShowList] = useState(false); // State to show list of cities
+    const [citySearch, setCitySearch] = useState([]); // States to search cities
+    const [savedCities, setSavedCities] = useState([]); // States to save cities
+    const [currentWeatherData, setCurrentWeatherData] = useState(null);
 
-    const apiKey = '36f14a7fb96cee69a613ad66ad705822';
+    const apiKey = '5e577bade8b344a313e992eff091dd6b'; // API Key (Will hide later)
   
+    // Function to search a city
     const search = (query) => {
       setCity(query);
       selectCity([]);
       setCitySearch([]);
 
         if (query) {
-          const apiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=20&appid=${apiKey}`;
-        
-        axios.get(apiUrl)
-        .then(response => {
-          const cities = response.data.map(cityItem => ({ 
-            name: cityItem.name,
-            state: cityItem.state,
-            country: cityItem.country,
-          }));
-          setCitySearch(cities);
-          setLoading(false);
-          setShowList(true);
-        })
-        .catch(error => {
-          console.log('Could not get city data', error);
-          setLoading(false);
-          setShowList(false);
-        });
+          const apiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=20&appid=${apiKey}`; 
+          axios.get(apiUrl)
+          .then(response => {
+            const cities = response.data.map(cityItem => ({ 
+              name: cityItem.name,
+              state: cityItem.state,
+              country: cityItem.country,
+            }));
+            setCitySearch(cities);
+            setShowList(true);
+          })
+          .catch(error => {
+            console.log('Could not get city data', error);
+            setShowList(false);
+          });
       }
       else {
         setCitySearch([]);
@@ -48,6 +46,7 @@ const WeatherScreen = () => {
     };
 
 
+    // Adds city to a saved list
     const addCity = (city) => {
       if (!city || !city || savedCities.some(savedCity => savedCity.name === city.name)) {
         return;
@@ -56,11 +55,12 @@ const WeatherScreen = () => {
         saveCitiesToStorage([...savedCities, city]);
     };
     
-
+    // Removes city from the saved list
     const removeCity = (city) => {
       setSavedCities(savedCities.filter(savedCity => savedCity.name !== city.name));
     }
 
+    // Stores saved city list in async storage
     const saveCitiesToStorage = async (cities) => {
       try {
         const jsonVal = JSON.stringify(cities);
@@ -70,6 +70,7 @@ const WeatherScreen = () => {
       }
     };
 
+    // Retrieves saved city list from async storage
     const retrieveCities = async () => {
       try {
         const jsonVal = await AsyncStorage.getItem('savedCities');
@@ -80,6 +81,7 @@ const WeatherScreen = () => {
       }
     };
 
+    // Checks to see if the city is saved
     const isCitySaved = (city) => {
       return savedCities.some(savedCity => 
         savedCity.name === city.name &&
@@ -88,6 +90,7 @@ const WeatherScreen = () => {
       );
     };
 
+    // Selects the city
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
       setCitySearch([]);
@@ -96,6 +99,8 @@ const WeatherScreen = () => {
       getWeatherData(apiUrl);
     };
 
+
+    // Bakcground changes based on current weather
     const weatherBackgrounds = {
       'overcast clouds': require('./assets/overcast.jpg'),
       'broken clouds': require('./assets/brokenClouds.jpg'),
@@ -103,23 +108,47 @@ const WeatherScreen = () => {
       'light rain': require('./assets/lightRain.jpg'),
     };
 
-    const getWeatherData = (theApiUrl) => {
-    setLoading(true);
-  
-    axios.get(theApiUrl)
-      .then(response => {
-        setWeatherData(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.log('Error fetching weather data', error);
-        setLoading(false);
-      });
+    const times = {
+      '00:00:00': '6 PM',
+      '03:00:00': '9 PM',
+      '06:00:00': '12 AM',
+      '09:00:00': '3 AM',
+      '12:00:00': '6 AM',
+      '15:00:00': '9 AM',
+      '18:00:00': '12 PM',
+      '21:00:00': '3 PM',
     };
 
+    // Function to get the weather data
+    const getWeatherData = (theApiUrl) => {
+      axios.get(theApiUrl)
+        .then(response => {
+          console.log(response.data);
+          setWeatherData(response.data);
+        })
+        .catch(error => {
+          console.log('Error fetching weather data', error);
+        });
+    };
+
+    
+      axios.get('https://api.openweathermap.org/data/2.5/forecast?lat=47.6694&lon=-122.1239&appid=5e577bade8b344a313e992eff091dd6b&units=imperial')
+        .then(response => {
+          setCurrentWeatherData(response.data);
+        })
+        .catch(error => {
+          console.log('Error fetching weather data', error);
+        });
+        
+    // Retrieves cities
     useEffect(() => {
       retrieveCities();
     }, []);
+
+    const convert = (time) => {
+      const myTime = moment(time).tz(moment.tz.guess());
+      return myTime.format('YYYY-MM-DD HH:mm:ss');
+    }
 
     return (
       <View style={styles.container}>
@@ -160,34 +189,35 @@ const WeatherScreen = () => {
             />
           )}
         </View>
-        {loading && city && <Text>Getting Results...</Text>}
+        {city && <Text></Text>}
         {weatherData && city &&(
           <View style={styles.container}>
             <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
-            <Text>City: {weatherData.city.name}, {weatherData.city.country}</Text>
+            <Text>City: {weatherData.city.name}, {weatherData.city.country}, ({weatherData.city.coord.lat}, {weatherData.city.coord.lon})</Text>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
-              {weatherData.list.slice(0,45).map((item, index) => {
-                const forecastDate = new Date(item.dt_txt.split(' ')[0]);
-                const dayOfWeek = forecastDate.toLocaleDateString('en-US', {weekday: 'long'});
+              {weatherData.list.map((item, index) => {
+                const theTime = convert(item.dt_txt);
+                const forecastDate = moment(item.dt_txt.split(' ')[0]).tz(moment.tz.guess());
+                const dayOfWeek = forecastDate.format('dddd');
                 if (index == 0) {
                   return (
                     <Text key={index}>
-                      {dayOfWeek.split(',')[0]}:
+                      {dayOfWeek}: {"\n"}{times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
                     </Text>
                   );
                 }
-                else if (item.dt_txt.split(' ')[1] == '00:00:00') {
+                else if (times[theTime.split(' ')[1]] == '12 AM') {
                   return (
                     <Text key={index}>
-                      {dayOfWeek.split(',')[0]}: {"\n"}{item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
+                      {dayOfWeek}: {"\n"}{times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
                     </Text>
                   )
                 }
                 else {
                   return (
                     <Text key={index}>
-                      {item.dt_txt.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
+                      {times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
                     </Text>
                   )
                 }
