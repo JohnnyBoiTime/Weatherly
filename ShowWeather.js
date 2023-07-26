@@ -5,6 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import moment from 'moment-timezone';
 
+// ADD CURRENT WEATHER!!!!
+
 // Main function to make the weather screen
 const WeatherScreen = () => {
     const [city, setCity] = useState(''); // States to set city
@@ -12,7 +14,7 @@ const WeatherScreen = () => {
     const [showList, setShowList] = useState(false); // State to show list of cities
     const [citySearch, setCitySearch] = useState([]); // States to search cities
     const [savedCities, setSavedCities] = useState([]); // States to save cities
-    const [currentWeatherData, setCurrentWeatherData] = useState(null);
+    const [showWeatherData, setShowCurrentWeatherData] = useState({});
 
     const apiKey = '5e577bade8b344a313e992eff091dd6b'; // API Key (Will hide later)
   
@@ -108,16 +110,19 @@ const WeatherScreen = () => {
       'light rain': require('./assets/lightRain.jpg'),
     };
 
+    // Converts UTC time to PST
     const times = {
-      '00:00:00': '6 PM',
-      '03:00:00': '9 PM',
-      '06:00:00': '12 AM',
-      '09:00:00': '3 AM',
-      '12:00:00': '6 AM',
-      '15:00:00': '9 AM',
-      '18:00:00': '12 PM',
-      '21:00:00': '3 PM',
+      '01:00:00': '1 AM',
+      '04:00:00': '4 AM',
+      '07:00:00': '7 AM',
+      '10:00:00': '11 PM',
+      '13:00:00': '2 PM',
+      '16:00:00': '5 PM',
+      '19:00:00': '8 PM',
+      '22:00:00': '11 PM',
     };
+
+
 
     // Function to get the weather data
     const getWeatherData = (theApiUrl) => {
@@ -125,30 +130,34 @@ const WeatherScreen = () => {
         .then(response => {
           console.log(response.data);
           setWeatherData(response.data);
+          const listWeather = {};
+          const timeOffset = response.data.city.timezone;
+          response.data.list.forEach(item => {
+            const forecastDate = new Date(item.dt_txt.split(' ')[0]);
+            const day = forecastDate.toDateString();
+            
+            listWeather[day] = false;
+          });
+          setShowCurrentWeatherData(listWeather);
         })
         .catch(error => {
           console.log('Error fetching weather data', error);
         });
     };
 
-    
-      axios.get('https://api.openweathermap.org/data/2.5/forecast?lat=47.6694&lon=-122.1239&appid=5e577bade8b344a313e992eff091dd6b&units=imperial')
-        .then(response => {
-          setCurrentWeatherData(response.data);
-        })
-        .catch(error => {
-          console.log('Error fetching weather data', error);
-        });
-        
+    const toggleShowWeather = (day) => {
+      setShowCurrentWeatherData(prevState => ({ ...prevState, [day]: !prevState[day] }));
+    };
+
     // Retrieves cities
     useEffect(() => {
       retrieveCities();
     }, []);
 
-    const convert = (time) => {
-      const myTime = moment(time).tz(moment.tz.guess());
+    const convert = (time, offset) => {
+      const myTime = moment(time).utcOffset(offset);
       return myTime.format('YYYY-MM-DD HH:mm:ss');
-    }
+    };
 
     return (
       <View style={styles.container}>
@@ -197,29 +206,49 @@ const WeatherScreen = () => {
             <Text>Forecast for the next 7 days: {"\n"} </Text>
             <ScrollView style={styles.scroller} bounces='false'>
               {weatherData.list.map((item, index) => {
-                const theTime = convert(item.dt_txt);
                 const forecastDate = moment(item.dt_txt.split(' ')[0]).tz(moment.tz.guess());
                 const dayOfWeek = forecastDate.format('dddd');
+                const theTime = convert(item.dt_txt, weatherData.city.timezone);
+                const theDay = forecastDate.toString();
+                const showWeather = showWeatherData[theDay];
                 if (index == 0) {
                   return (
-                    <Text key={index}>
-                      {dayOfWeek}: {"\n"}{times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
-                    </Text>
+                    <View key={index}>
+                      <TouchableOpacity onPress={() => toggleShowWeather(theDay)}>
+                        <Text>{dayOfWeek}:</Text>
+                      </TouchableOpacity>
+                      {showWeather && (
+                        <Text>
+                          {times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
+                        </Text>
+                    )}
+                  </View>
                   );
                 }
-                else if (times[theTime.split(' ')[1]] == '12 AM') {
+                else if (theTime.split(' ')[1] == '19:00:00') {
                   return (
-                    <Text key={index}>
-                      {dayOfWeek}: {"\n"}{times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
-                    </Text>
-                  )
+                    <View key={index}>
+                      <TouchableOpacity onPress={() => toggleShowWeather(theDay)}>
+                        <Text>{dayOfWeek}:</Text>
+                      </TouchableOpacity>
+                      {showWeather && (
+                        <Text>
+                          {times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
+                        </Text>
+                    )}
+                  </View>
+                  );
                 }
                 else {
                   return (
-                    <Text key={index}>
-                      {times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
-                    </Text>
-                  )
+                    <View key={index}>
+                      {showWeather && (
+                        <Text key={index}>
+                          {times[theTime.split(' ')[1]]}: {item.main.temp}, {item.weather[0].description}
+                        </Text>
+                      )}
+                    </View>
+                  );
                 }
             })}
             </ScrollView>
