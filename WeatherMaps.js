@@ -1,59 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, UrlTile } from 'react-native-maps';
-
-import axios from 'axios';
-
-// CHANGE VARIABLE NAMES AND STRUCTURE BEFORE PUSHING TO GITHUB!
+import MapView, { PROVIDER_GOOGLE, UrlTile } from 'react-native-maps';
 
 // Weathermap
 const WeatherMap = () => {
-  
-  const [markerCoordinate, setMarkerCoordinate] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-  });
 
-
-
-  const API_KEY = '5e577bade8b344a313e992eff091dd6b'; // HIDE
-
-  const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather'; // API URL
-
-  // Gets weather from api
-  useEffect(() => {
-    const fetchWeather = async () => {
-      const response = await axios.get(WEATHER_API_URL, {
-        params: {
-          lat: markerCoordinate.latitude,
-          lon: markerCoordinate.longitude,
-          appid: API_KEY,
-          units: 'imperial',
-        },
-      });
-      setWeatherData(response.data);
-    };
-
-    fetchWeather();
-  }, [markerCoordinate]);
+  const apiKey = 'HIDDEN';
   
   // Changes weather layer
   const weatherMapLayers = [
     {
       id: 'clouds',
-      url: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=5e577bade8b344a313e992eff091dd6b',
+      url: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`,
     },
     {
       id: 'precipitation',
-      url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=5e577bade8b344a313e992eff091dd6b',
+      url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`,
     },
     {
       id: 'temperature',
-      url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=5e577bade8b344a313e992eff091dd6b',
+      url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
     },
     {
       id: 'wind',
-      url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=5e577bade8b344a313e992eff091dd6b',
+      url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${apiKey}`,
     },
   ];
 
@@ -75,6 +45,17 @@ const WeatherMap = () => {
     },
   ];
 
+  const cloudLegend = () => {
+    return (
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, {backgroundColor: 'blue'}]}/>
+          <Text>Clear</Text>
+        </View>
+      </View>
+      );
+  };
+
   return (
     <View style={styles.container}>
 
@@ -82,14 +63,7 @@ const WeatherMap = () => {
       <MapView
       provider={PROVIDER_GOOGLE}
         style={styles.map}
-        initialRegion={{ 
-          latitude: markerCoordinate.latitude,
-          longitude: markerCoordinate.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
         customMapStyle={grayscaleStyle}
-        onPress={(e) => setMarkerCoordinate(e.nativeEvent.coordinate)}
       >
   
         {/* Displays Layers */}
@@ -125,6 +99,23 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 20,
+  },
+  legendColor: {
+    width: 20,
+    height: 20,
+    marginRight: 20,
   },
   weatherContainer: {
     position: 'absolute',
