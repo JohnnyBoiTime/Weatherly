@@ -13,7 +13,6 @@ export default function App() {
       <NavigationContainer> 
         <TabBottom.Navigator screenOptions={{headerShown: false, gestureDirection: 'horizontal', gestureResponseDistance: 1284}}>
         <TabBottom.Screen name="Current Weather" component={WeatherScreen}/>
-        <TabBottom.Screen name="Details" component={InProgressScreen2}/>
         <TabBottom.Screen name="Maps" component={WeatherMap} />
         <TabBottom.Screen name="Credits" component={CreditScreen} />
       </TabBottom.Navigator>
@@ -25,29 +24,11 @@ const Stack = createStackNavigator();
 
 const TabBottom = createBottomTabNavigator();
 
-// Home
-function InProgressScreen2() {
-  return (
-    <View style={styles.container}>
-          <Text>In Progress</Text>
-    </View>
-  );
-};
-
 // Credits
 function CreditScreen() {
   return (
     <View style={styles.container}>
           <Text>Made by Philip Rickey</Text>
-    </View>
-  
-  );
-};
-
-function InProgressScreen() {
-  return (
-    <View style={styles.container}>
-          <Text>In Progress</Text>
     </View>
   
   );
