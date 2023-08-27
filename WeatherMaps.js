@@ -45,17 +45,6 @@ const WeatherMap = () => {
     },
   ];
 
-  const cloudLegend = () => {
-    return (
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, {backgroundColor: 'blue'}]}/>
-          <Text>Clear</Text>
-        </View>
-      </View>
-      );
-  };
-
   return (
     <View style={styles.container}>
 
