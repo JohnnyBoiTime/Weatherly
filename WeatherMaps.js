@@ -89,23 +89,6 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 20,
-  },
-  legendColor: {
-    width: 20,
-    height: 20,
-    marginRight: 20,
-  },
   weatherContainer: {
     position: 'absolute',
     bottom: 16,
