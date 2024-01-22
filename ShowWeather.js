@@ -18,8 +18,8 @@ const WeatherScreen = () => {
     const [savedCities, setSavedCities] = useState([]); // States to save cities
     const [isCityFound, setIsCityFound] = useState(false); // States to see if city was found in the database
 
-    const apiKey = '5e577bade8b344a313e992eff091dd6b'; // API Key (Will hide later)
-    const ip = '10.109.213.149'; // ip
+    const apiKey = 'HIDDEN'; // API Key (Will hide later)
+    const ip = 'HIDDEN'; // ip
 
     // Querying a city
     const search = (query) => {
