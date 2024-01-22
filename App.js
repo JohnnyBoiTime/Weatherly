@@ -6,6 +6,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import WeatherScreen from './ShowWeather';
 import WeatherMap from './WeatherMaps';
+import { NativeBaseProvider, Box } from 'native-base';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Main app
 export default function App() {
@@ -25,12 +27,22 @@ const Stack = createStackNavigator();
 const TabBottom = createBottomTabNavigator();
 
 // Credits
-function CreditScreen() {
+const CreditScreen = () => {
   return (
-    <View style={styles.container}>
-          <Text>Made by Philip Rickey</Text>
-    </View>
-  
+    <NativeBaseProvider>
+      <LinearGradient
+      colors = {['#800080', '#87ceeb']}
+      locations={[0.1, 0.9]}
+      style={{ flex: 1 }}
+      >
+        <Box alignSelf="center" paddingTop={300}>
+        <View>
+          <Text styles={styles.container}>Made by Philip Rickey</Text>
+          <Text>API courtesy of OpenWeatherAPI</Text>
+        </View>
+        </Box>
+      </LinearGradient>
+    </NativeBaseProvider>
   );
 };
 
@@ -40,6 +52,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    textAlign: 'center'
   },
   img: {
     flex: 3,
