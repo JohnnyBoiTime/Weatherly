@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { ImageBackground, Button, FlatList, View,  ScrollView, TextInput, Text, StyleSheet } from 'react-native';
+import { ImageBackground, Button, FlatList, View, TextInput, Text, StyleSheet,TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import moment from 'moment-timezone';
+import { ScrollView, NativeBaseProvider, Box, Divider, Heading } from 'native-base';
+import moment, { unix } from 'moment-timezone';
+
+
+// ADD CURRENT WEATHER!!!!
+
 
 // Main function to make the weather screen
 const WeatherScreen = () => {
     const [city, setCity] = useState(''); // States to set city
     const [weatherData, setWeatherData] = useState(null); // States for weather data
+    const [currentWeather, setCurrentWeather] = useState(null);
     const [showList, setShowList] = useState(false); // State to show list of cities
     const [citySearch, setCitySearch] = useState([]); // States to search cities
     const [savedCities, setSavedCities] = useState([]); // States to save cities
     const [isCityFound, setIsCityFound] = useState(false); // States to see if city was found in the database
 
-    const apiKey = 'HIDDEN'; // API Key 
-    const ip = 'HIDDEN'; //Ip
+    const apiKey = '5e577bade8b344a313e992eff091dd6b'; // API Key (Will hide later)
+    const ip = '10.109.213.149'; // ip
 
-    // Function to search a city
+    // Querying a city
     const search = (query) => {
       setCity(query);
       selectCity([]);
@@ -38,7 +43,8 @@ const WeatherScreen = () => {
             setCitySearch(cities);
             setShowList(true);
           })
-          // We had a problem getting the city dat
+
+          // We had a problem getting the city data
           .catch(error => {
             console.log('Could not get city data', error);
             setShowList(false);
@@ -53,58 +59,59 @@ const WeatherScreen = () => {
 
   // Extracts desired information from API response,
   // inserts information into database
-  const insertCityToDatabase = async (weatherData) => {
+const insertCityToDatabase = async (weatherData) => {
 
-      try {
-        // Takes city data from parameters
-        const cityData = {
-          time: weatherData.list.map(item => item.dt_txt.split(' ')[1]),
-          city_name: weatherData.city.name,
-          city_country: weatherData.city.country,
-          city_lon: weatherData.city.coord.lon,
-          city_lat: weatherData.city.coord.lat,
-          temp: weatherData.list.map(item => item.main.temp),
-          weather_desc: weatherData.list.map(item => item.weather[0].description),
-        };
-       
-        // Seperates city data into respective fields
-        const {time, city_name, city_country, city_lon, city_lat, temp, weather_desc} = cityData;
-
-        // City data added to database
-        for (let i = 0; i < time.length; i++) {
-          const city = {
-            time: time[i], // with a wide range of data, time changes, thus we iterate through every time value from data
-            city_name,
-            city_country,
-            city_lon,
-            city_lat,
-            temp: temp[i], // Same concept as time
-            weather_desc: weather_desc[i], // Same concept as time
-          };
-            
-          // Everything was succesfull
-          await axios.post(`http://${ip}:3000/api/add_cities`, city);
-
-        }
-
-        // Info to remember specific city by
-        const citySpecifics = {
-          name: cityData.city_name,
-          country: cityData.city_country,
-          lon: cityData.city_lon,
-          lat: cityData.city_lat,
-        };
-
-        // Visible list on weather screen and insertion was successfull!
-        setSavedCities([...savedCities, citySpecifics]);
-        setIsCityFound(false);
-        console.log('City inserted successfully!');
-
-      // City was not inserted correctly
-      } catch (error) {
-        console.error('Error inserting city!', error);
-      }
+  try {
+    
+    // Takes city data from parameters
+    const cityData = {
+      time: weatherData.list.map(item => item.dt_txt.split(' ')[1]),
+      city_name: weatherData.city.name,
+      city_country: weatherData.city.country,
+      city_lon: weatherData.city.coord.lon,
+      city_lat: weatherData.city.coord.lat,
+      temp: weatherData.list.map(item => item.main.temp),
+      weather_desc: weatherData.list.map(item => item.weather[0].description),
     };
+
+    // Seperates city data into respective fields
+    const {time, city_name, city_country, city_lon, city_lat, temp, weather_desc} = cityData;
+
+    // City data added to database 
+    for (let i = 0; i < time.length; i++) {
+      const city = {
+        time: time[i], // with a wide range of data, time changes, thus we iterate through every time value from data
+        city_name,
+        city_country,
+        city_lon,
+        city_lat,
+        temp: temp[i], // Same concept as time
+        weather_desc: weather_desc[i], // Same concept as time
+      };
+
+      // Everything was succesfull
+      await axios.post(`http://${ip}:3000/api/add_cities`, city); 
+
+    }
+
+    // Info to remember specific city by
+    const citySpecifics = {
+      name: cityData.city_name,
+      country: cityData.city_country,
+      lon: cityData.city_lon,
+      lat: cityData.city_lat,
+    };
+
+    // Visible list on weather screen
+    setSavedCities([...savedCities, citySpecifics]);
+    setIsCityFound(false);
+    console.log('City inserted successfully!');
+
+    // City was not inserted correctly
+  } catch (error) {
+    console.error('Error inserting city!', error);
+  }
+};
 
   // Deletes cities based on name
   const deleteCities = async (cityName) => {
@@ -112,20 +119,20 @@ const WeatherScreen = () => {
       const response = await axios.delete(`http://${ip}:3000/api/delete_cities`, {
         data: { city_name: cityName },
       });
-        
+  
+      console.log(response.data.message);
+
       // Remove saved city from visible list
       setSavedCities(savedCities.filter(savedCity => savedCity.name !== cityName));
       setIsCityFound(true);
 
     // Could not delete city
     } catch (error) {
-      console.error('Error testing delete_cities:', error);
+      console.error('Error deleting city:', error);
     }
   };
 
-
-
- // Find a city in the database
+  // Find a city in the database
   const searchDatabase = async (weatherData) => {
     try {
       const response = await fetch(`http://${ip}:3000/api/search_city?city_name=${weatherData.city.name}&city_lon=${weatherData.city.coord.lon}&city_lat=${weatherData.city.coord.lat}`);
@@ -136,7 +143,6 @@ const WeatherScreen = () => {
         console.log("City Found!");
         setIsCityFound(false);
       }
-          
       // There was no data found
       else {
         setIsCityFound(true);
@@ -148,14 +154,13 @@ const WeatherScreen = () => {
     }
   };
 
-
   // Grabs city if it exists in the databse
   const grabFromDatabase = async () => {
     try {
       const response = await axios.get(`http://${ip}:3000/api/fetch_cities`);
-      const cities = response.data;
+      const cities = response.data; 
 
-      // Find city based on defining info 
+      // Selectively picks defining info for the city
       const citySpecifics = cities.map(citiesInfo => ({
         name: citiesInfo.city_name,
         country: citiesInfo.city_country,
@@ -168,12 +173,12 @@ const WeatherScreen = () => {
       // Does the city already exist in the datbase?
       if (cities.length === 0) {
         console.log('No cities found in database!');
-
+      
       // it does, so grab it
       } else {
         setSavedCities(citySpecifics);
       }
-        
+    
     // Could not fetch the city
     } catch (error) {
       console.error('Error fetching cities:', error);
@@ -184,8 +189,10 @@ const WeatherScreen = () => {
     const selectCity = (selectedCity) => {
       setCity(selectedCity.name);
       setShowList(false);
-      const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${apiKey}&units=imperial`;
-      getWeatherData(apiUrl);
+      const futureWeather = `https://api.openweathermap.org/data/2.5/forecast?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${apiKey}&units=imperial`;
+      const currentWeather = `https://api.openweathermap.org/data/2.5/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${apiKey}&units=imperial`;
+      getTheCurrentWeatherData(currentWeather);
+      getWeatherData(futureWeather);
     };
 
     // Bakcground changes based on current weather
@@ -236,6 +243,19 @@ const WeatherScreen = () => {
         });
     };
 
+    // Function to get the current weather data
+    const getTheCurrentWeatherData = (theApiUrl) => {
+      axios.get(theApiUrl)
+        .then(response => {
+          setCurrentWeather(response.data);
+          console.log(response.data);
+          searchDatabase(response.data);
+        })
+        .catch(error => {
+          console.log('Error fetching weather data', error);
+        });
+    };
+
     // Converts the time to local time, considers offset
     const convert = (time, offset) => {
       const myTime = moment(time).utcOffset(offset);
@@ -248,13 +268,14 @@ const WeatherScreen = () => {
     
     return (
       <View style={styles.container}>
-        {/*Background for the screen*/ }
+
+      {/*Background for the app*/ }
         <ImageBackground 
           source={require('./assets/weatherBG.jpg')}
           style={styles.img}
         >
 
-        {/* Text input box for searching the weather */}
+          {/* Text input box for searching the weather */}
         <TextInput
           style={styles.inputBox}
           placeholder='Enter City Name'
@@ -276,7 +297,6 @@ const WeatherScreen = () => {
             />
           </View>
           <View>
-
           {/* Flatlist for searching and displaying cities for user to select */}
           {showList && (
             <FlatList 
@@ -292,36 +312,48 @@ const WeatherScreen = () => {
           )}
         </View>
         {city && <Text></Text>}
+
         {/* Displays weather to the screen after user selects a valid city */}
-        {weatherData && city &&(
+        {weatherData && city && currentWeather && (
+          <NativeBaseProvider>
           <View style={styles.container}>
             {/* Changes image based on the current weather */}
             <ImageBackground style={styles.img} source={weatherBackgrounds[weatherData.list[0].weather[0].description]}>
             {/*Displays city information */}
-            <Text>City: {weatherData.city.name}, {weatherData.city.country}, ({weatherData.city.coord.lat}, {weatherData.city.coord.lon})</Text>
+            <Heading>City: {weatherData.city.name}, {weatherData.city.country}, ({weatherData.city.coord.lat}, {weatherData.city.coord.lon})</Heading>
             <Text>Forecast for the next 7 days: {"\n"} </Text>
+
             {/* Displays the forecast using a scrollview, maps information and iterates through all info to get
             the weather information */}
             <ScrollView style={styles.scroller} bounces='false'>
               {weatherData.list.map((item, index) => {
+                const timeStamp = currentWeather.dt * 1000;
+                const utc = new Date(timeStamp);
+                const timeStampOffset = 4 * 60;
+                const adjusted = new Date(utc.getTime() + timeStampOffset * 60 * 1000)
+                const readableTime = adjusted.toISOString().substring(11,19);
                 const forecastDate = moment(item.dt_txt.split(' ')[0]).tz(moment.tz.guess());
                 const dayOfWeek = forecastDate.format('dddd');
                 const theTime = convert(item.dt_txt, weatherData.city.timezone);
                 if (index == 0) {
                   return (
                     <View key={index}>
+                    <Text>
                     <Text>{dayOfWeek}:</Text>
-                    <Text >
+                      {readableTime}: {currentWeather.main.temp}, {currentWeather.weather[0].main} {"\n"}
                       {theTime.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
                     </Text>
                   </View>
                   );
                 }
-                else if (theTime.split(' ')[1] == '01:00:00') {
+                else if (theTime.split(' ')[1] == '23:00:00') {
                   return (
                     <View key={index}>
-                        <Text>{dayOfWeek}:</Text>
+                      <Divider my="2" _light ={{
+                      bg: "muted.800"
+                    }} />
                         <Text >
+                        <Text>{dayOfWeek}:</Text>
                           {theTime.split(' ')[1]}: {item.main.temp}, {item.weather[0].description}
                         </Text>
                       </View>
@@ -344,6 +376,7 @@ const WeatherScreen = () => {
               )}
             </ImageBackground>
           </View>
+          </NativeBaseProvider>
         )}
         </ImageBackground>  
       </View>
@@ -388,5 +421,3 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 });
-
-
