@@ -4,10 +4,6 @@ import axios from 'axios';
 import { ScrollView, NativeBaseProvider, Box, Divider, Heading } from 'native-base';
 import moment, { unix } from 'moment-timezone';
 
-
-// ADD CURRENT WEATHER!!!!
-
-
 // Main function to make the weather screen
 const WeatherScreen = () => {
     const [city, setCity] = useState(''); // States to set city
